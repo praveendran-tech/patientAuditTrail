@@ -17,11 +17,10 @@ import {
   CircularProgress,
 } from "@mui/material";
 import API from "../api";
-import { useNavigate } from "react-router-dom";
 import TimelineComponent from "./Timeline";
 
 const DoctorPortal = () => {
-  const [option, setOption] = useState(""); // 'new' or 'existing'
+  const [option, setOption] = useState("");
   const [form, setForm] = useState({
     doctorId: "",
     patientId: "",
@@ -40,11 +39,9 @@ const DoctorPortal = () => {
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDiagnosisEntries, setSelectedDiagnosisEntries] = useState([]);
-  const navigate = useNavigate(); // Assigned but not used
 
   const handleOptionChange = (e) => {
     setOption(e.target.value);
-    // Reset form and other states when option changes
     setForm({
       doctorId: "",
       patientId: "",
@@ -76,19 +73,18 @@ const DoctorPortal = () => {
     });
   };
 
-  // **New Function Added**
   const handleAddDiagnosisEntry = () => {
-    setOption("new"); // Switch to 'Create New Diagnosis' form
+    setOption("new");
     setForm((prevForm) => ({
       ...prevForm,
-      patientId: prevForm.patientId, // Retain existing Patient ID
-      diagnosisId: prevForm.diagnosisId, // Retain existing Diagnosis ID
+      patientId: prevForm.patientId,
+      diagnosisId: prevForm.diagnosisId,
       symptoms: "",
       doctorDiagnosis: "",
       prescription: "",
     }));
-    setError(""); // Clear any existing errors
-    setSuccessMsg(""); // Clear any existing success messages
+    setError("");
+    setSuccessMsg("");
   };
 
   const handleSubmit = async () => {
@@ -101,7 +97,6 @@ const DoctorPortal = () => {
       prescription,
     } = form;
 
-    // Basic frontend validation
     if (
       !doctorId ||
       !patientId ||
@@ -114,7 +109,6 @@ const DoctorPortal = () => {
       return;
     }
 
-    // Create FormData object
     const formData = new FormData();
     formData.append("doctorId", doctorId);
     formData.append("patientId", patientId);
@@ -130,7 +124,6 @@ const DoctorPortal = () => {
       const res = await API.post("/doctors/diagnosis", formData);
       setSuccessMsg("Diagnosis submitted successfully!");
       setError("");
-      // Reset form
       setForm({
         doctorId: "",
         patientId: "",
@@ -143,15 +136,13 @@ const DoctorPortal = () => {
         report: null,
         image: null,
       });
-      // Refresh existing diagnoses
       handleCheckDiagnosis();
     } catch (err) {
       console.error(err);
-      if (err.response && err.response.data && err.response.data.msg) {
-        setError(err.response.data.msg);
-      } else {
-        setError("An error occurred while submitting the diagnosis.");
-      }
+      setError(
+        err.response?.data?.msg ||
+          "An error occurred while submitting the diagnosis."
+      );
       setSuccessMsg("");
     }
     setLoading(false);
@@ -175,16 +166,12 @@ const DoctorPortal = () => {
       setError("");
     } catch (err) {
       console.error(err);
-      if (err.response && err.response.status === 404) {
-        // Diagnosis ID does not exist for the patient
-        setExistingDiagnoses([]);
-        setError(
-          "Diagnosis ID does not exist for this patient. You can create a new diagnosis."
-        );
-      } else {
-        setError("An error occurred while checking the diagnosis.");
-        setExistingDiagnoses([]);
-      }
+      setError(
+        err.response?.status === 404
+          ? "Diagnosis ID does not exist for this patient. You can create a new diagnosis."
+          : "An error occurred while checking the diagnosis."
+      );
+      setExistingDiagnoses([]);
     }
     setLoading(false);
   };
@@ -203,8 +190,23 @@ const DoctorPortal = () => {
   };
 
   return (
-    <Container>
-      <Typography variant="h4" gutterBottom>
+    <Container
+      maxWidth={false}
+      sx={{
+        minHeight: "100vh",
+        backgroundColor: "#FFAF0", // Background color
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: 4,
+      }}
+    >
+      <Typography
+        variant="h4"
+        gutterBottom
+        sx={{ fontWeight: "bold", color: "#2C3E50", mb: 4 }}
+      >
         Doctor Dashboard
       </Typography>
 
@@ -214,12 +216,80 @@ const DoctorPortal = () => {
         </Alert>
       )}
       {successMsg && (
-        <Alert severity="success" sx={{ mb: 2 }}>
-          {successMsg}
-        </Alert>
+        <Modal
+          open={!!successMsg} // Show modal if successMsg exists
+          onClose={() => setSuccessMsg("")} // Clear success message on close
+          aria-labelledby="success-modal-title"
+          aria-describedby="success-modal-description"
+          sx={{
+            backdropFilter: "blur(6px)", // Add light blur effect
+            bgcolor: "rgba(0, 0, 0, 0.5)", // Darken background
+          }}
+        >
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: { xs: "90%", sm: "400px" },
+              bgcolor: "background.paper",
+              boxShadow: 24,
+              p: 4,
+              borderRadius: "16px",
+              textAlign: "center",
+            }}
+          >
+            <Typography
+              id="success-modal-title"
+              variant="h5"
+              gutterBottom
+              sx={{
+                fontWeight: "bold",
+                color: "#2E7D32",
+                mb: 2,
+              }}
+            >
+              Success!
+            </Typography>
+            <Typography
+              id="success-modal-description"
+              sx={{
+                fontSize: "1.2rem",
+                fontWeight: "medium",
+                color: "#444",
+                mb: 3,
+              }}
+            >
+              {successMsg}
+            </Typography>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={() => setSuccessMsg("")}
+              sx={{
+                borderRadius: "20px",
+                fontSize: "1rem",
+                padding: "10px 20px",
+                bgcolor: "#4CAF50",
+                "&:hover": {
+                  bgcolor: "#45A049",
+                },
+              }}
+            >
+              OK
+            </Button>
+          </Box>
+        </Modal>
       )}
 
-      <Box sx={{ mb: 4 }}>
+      {loading && (
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+          <CircularProgress />
+        </Box>
+      )}
+
+      <Box sx={{ mb: 4, width: "100%", maxWidth: "600px" }}>
         <FormControl fullWidth>
           <InputLabel id="option-label">Select Option</InputLabel>
           <Select
@@ -237,10 +307,9 @@ const DoctorPortal = () => {
         </FormControl>
       </Box>
 
-      {/* Option to Create New Diagnosis */}
       {option === "new" && (
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h6" gutterBottom>
+        <Box sx={{ width: "100%", maxWidth: "600px", mb: 4 }}>
+          <Typography variant="h6" sx={{ mb: 2, color: "#34495E" }}>
             Create New Diagnosis
           </Typography>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -298,7 +367,6 @@ const DoctorPortal = () => {
               onChange={handleChange}
             />
 
-            {/* File Uploads */}
             <Box
               sx={{ display: "flex", justifyContent: "space-between", mt: 1 }}
             >
@@ -328,7 +396,7 @@ const DoctorPortal = () => {
               variant="contained"
               color="primary"
               onClick={handleSubmit}
-              sx={{ mt: 2 }}
+              sx={{ mt: 2, borderRadius: "20px" }}
             >
               Submit Diagnosis
             </Button>
@@ -336,10 +404,9 @@ const DoctorPortal = () => {
         </Box>
       )}
 
-      {/* Option to Use Existing Diagnosis */}
       {option === "existing" && (
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h6" gutterBottom>
+        <Box sx={{ width: "100%", maxWidth: "600px", mb: 4 }}>
+          <Typography variant="h6" sx={{ mb: 2, color: "#34495E" }}>
             Use Existing Diagnosis
           </Typography>
           <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
@@ -371,6 +438,7 @@ const DoctorPortal = () => {
               variant="contained"
               color="primary"
               onClick={handleCheckDiagnosis}
+              sx={{ borderRadius: "20px" }}
             >
               Check Diagnosis
             </Button>
@@ -378,10 +446,9 @@ const DoctorPortal = () => {
         </Box>
       )}
 
-      {/* Display Existing Diagnoses Timeline */}
       {existingDiagnoses.length > 0 && option === "existing" && (
-        <Box sx={{ mb: 4 }}>
-          <Typography variant="h6" gutterBottom>
+        <Box sx={{ mb: 4, width: "100%", maxWidth: "600px" }}>
+          <Typography variant="h6" sx={{ mb: 2, color: "#2C3E50" }}>
             Diagnosis Timeline:
           </Typography>
           <TimelineComponent diagnoses={existingDiagnoses} />
@@ -390,6 +457,7 @@ const DoctorPortal = () => {
               variant="contained"
               color="secondary"
               onClick={handleAddDiagnosisEntry}
+              sx={{ borderRadius: "20px" }}
             >
               Add New Diagnosis Entry
             </Button>
@@ -397,14 +465,12 @@ const DoctorPortal = () => {
         </Box>
       )}
 
-      {/* Loading Indicator */}
       {loading && (
         <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
           <CircularProgress />
         </Box>
       )}
 
-      {/* Modal for Viewing Timeline */}
       <Modal
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
