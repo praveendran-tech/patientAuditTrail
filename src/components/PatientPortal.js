@@ -241,6 +241,73 @@ const PatientPortal = () => {
               Create Patient
             </Button>
           </Box>
+          {/* Success Modal */}
+          <Modal
+            open={!!successMsg}
+            onClose={() => setSuccessMsg("")} // Close modal on dismiss
+            aria-labelledby="success-modal-title"
+            aria-describedby="success-modal-description"
+            sx={{
+              backdropFilter: "blur(6px)", // Adds a light blur to the background
+              bgcolor: "rgba(0, 0, 0, 0.5)", // Slightly darken the background for focus
+            }}
+          >
+            <Box
+              sx={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                width: { xs: "90%", sm: "400px" },
+                bgcolor: "background.paper",
+                boxShadow: 24,
+                p: 4,
+                borderRadius: "16px", // Rounded corners
+                textAlign: "center",
+                fontFamily: "'Poppins', sans-serif", // Nice font style
+              }}
+            >
+              <Typography
+                id="success-modal-title"
+                variant="h5"
+                gutterBottom
+                sx={{
+                  fontWeight: "bold",
+                  color: "#2E7D32", // Green color for success
+                  mb: 2,
+                }}
+              >
+                Success!
+              </Typography>
+              <Typography
+                id="success-modal-description"
+                sx={{
+                  fontSize: "1.2rem",
+                  fontWeight: "medium",
+                  color: "#444",
+                  mb: 3,
+                }}
+              >
+                {successMsg}
+              </Typography>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => setSuccessMsg("")} // Close modal when clicked
+                sx={{
+                  borderRadius: "20px",
+                  fontSize: "1rem",
+                  padding: "10px 20px",
+                  bgcolor: "#4CAF50",
+                  "&:hover": {
+                    bgcolor: "#45A049",
+                  },
+                }}
+              >
+                OK
+              </Button>
+            </Box>
+          </Modal>
         </Box>
       )}
 
@@ -392,7 +459,10 @@ const PatientPortal = () => {
           >
             Diagnosis Details
           </Typography>
-          <TimelineComponent diagnoses={selectedDiagnosisEntries} />
+          <TimelineComponent
+            diagnoses={selectedDiagnosisEntries}
+            showAIButton={true}
+          />
         </Box>
       </Modal>
     </Container>

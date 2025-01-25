@@ -39,6 +39,8 @@ const DoctorPortal = () => {
   const [loading, setLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedDiagnosisEntries, setSelectedDiagnosisEntries] = useState([]);
+  const [showTimeline, setShowTimeline] = useState(false);
+  const [diagnoses, setDiagnoses] = useState([]);
 
   const handleOptionChange = (e) => {
     setOption(e.target.value);
@@ -124,6 +126,8 @@ const DoctorPortal = () => {
       const res = await API.post("/doctors/diagnosis", formData);
       setSuccessMsg("Diagnosis submitted successfully!");
       setError("");
+      const timelineRes = await API.get(`/patients/${patientId}/diagnoses`);
+      setDiagnoses(timelineRes.data);
       setForm({
         doctorId: "",
         patientId: "",
@@ -188,6 +192,14 @@ const DoctorPortal = () => {
       setError("An error occurred while fetching the timeline.");
     }
   };
+
+  if (showTimeline) {
+    return (
+      <Container maxWidth="md" sx={{ mt: 4 }}>
+        <TimelineComponent diagnoses={existingDiagnoses} showAIButton={false} />
+      </Container>
+    );
+  }
 
   return (
     <Container
@@ -266,7 +278,10 @@ const DoctorPortal = () => {
             <Button
               variant="contained"
               color="primary"
-              onClick={() => setSuccessMsg("")}
+              onClick={() => {
+                setSuccessMsg("");
+                setShowTimeline(true);
+              }}
               sx={{
                 borderRadius: "20px",
                 fontSize: "1rem",
@@ -448,9 +463,10 @@ const DoctorPortal = () => {
 
       {existingDiagnoses.length > 0 && option === "existing" && (
         <Box sx={{ mb: 4, width: "100%", maxWidth: "600px" }}>
-          <Typography variant="h6" sx={{ mb: 2, color: "#2C3E50" }}>
-            Diagnosis Timeline:
-          </Typography>
+          <Typography
+            variant="h6"
+            sx={{ mb: 2, color: "#2C3E50" }}
+          ></Typography>
           <TimelineComponent diagnoses={existingDiagnoses} />
           <Box sx={{ mt: 2 }}>
             <Button
@@ -491,7 +507,10 @@ const DoctorPortal = () => {
             overflowY: "auto",
           }}
         >
-          <TimelineComponent diagnoses={selectedDiagnosisEntries} />
+          <TimelineComponent
+            diagnoses={selectedDiagnosisEntries}
+            showAIButton={false}
+          />
         </Box>
       </Modal>
     </Container>
