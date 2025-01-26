@@ -11,7 +11,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "https://patient-audit-trail.vercel.app/", // Replace with your actual frontend URL
+    origin: ["http://localhost:5001", "http://localhost:3000"], // Replace with your actual frontend URL
     methods: ["GET", "POST", "PUT", "DELETE"], // Specify allowed methods
     allowedHeaders: ["Content-Type", "Authorization"], // Specify allowed headers
     credentials: true, // If you need to allow cookies
